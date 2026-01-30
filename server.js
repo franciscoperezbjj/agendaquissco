@@ -92,9 +92,14 @@ app.post('/api/reservations', requireAuth, (req, res) => {
   try {
     const { nombre, apellido, rut, whatsapp, valor, date, time, duration } = req.body;
     
-    if (!nombre || !date || !time || !duration) {
+    console.log('📝 Datos recibidos:', req.body);
+    
+    if (!nombre || !date || !time) {
+      console.error('❌ Faltan campos requeridos');
       return res.status(400).json({ error: 'Faltan campos requeridos' });
     }
+
+    const durationNum = parseFloat(duration) || 1;
 
     const stmt = db.prepare(`
       INSERT INTO reservations (nombre, apellido, rut, whatsapp, valor, date, time, duration, createdAt)
@@ -102,22 +107,23 @@ app.post('/api/reservations', requireAuth, (req, res) => {
     `);
     
     const result = stmt.run(
-      nombre, 
+      nombre || '', 
       apellido || '', 
       rut || '', 
       whatsapp || '', 
       valor || '', 
       date, 
       time, 
-      duration, 
+      durationNum, 
       new Date().toISOString()
     );
 
     const newReservation = db.prepare('SELECT * FROM reservations WHERE id = ?').get(result.lastInsertRowid);
+    console.log('✅ Reserva creada:', newReservation);
     res.json(newReservation);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error al crear reserva' });
+    console.error('❌ Error al crear reserva:', error);
+    res.status(500).json({ error: 'Error al crear reserva', details: error.message });
   }
 });
 

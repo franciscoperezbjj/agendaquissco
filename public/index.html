@@ -916,11 +916,17 @@
             }
 
             const reservation = {
-                ...parsedData,
-                date,
-                time,
+                nombre: parsedData.nombre,
+                apellido: parsedData.apellido || '',
+                rut: parsedData.rut || '',
+                whatsapp: parsedData.whatsapp || '',
+                valor: parsedData.valor || '',
+                date: date,
+                time: time,
                 duration: parseFloat(duration)
             };
+
+            console.log('📤 Enviando reserva:', reservation);
 
             try {
                 let response;
@@ -938,17 +944,21 @@
                     });
                 }
 
+                const data = await response.json();
+                console.log('📥 Respuesta del servidor:', data);
+
                 if (response.ok) {
                     clearForm();
                     editingId = null;
                     await loadData();
                     showNotification('Reserva guardada exitosamente');
                 } else {
-                    showNotification('Error al guardar reserva', false);
+                    console.error('❌ Error del servidor:', data);
+                    showNotification(data.error || 'Error al guardar reserva', false);
                 }
             } catch (error) {
-                console.error('Error:', error);
-                showNotification('Error de conexión', false);
+                console.error('❌ Error de red:', error);
+                showNotification('Error de conexión con el servidor', false);
             }
         }
 

@@ -1,0 +1,60 @@
+# ⚡ INSTRUCCIONES RÁPIDAS
+
+## 1️⃣ Extrae el ZIP
+
+Descomprime `sistema-reservas.zip` en una carpeta.
+
+## 2️⃣ Sube a GitHub
+
+Abre terminal/CMD en la carpeta y ejecuta:
+
+```bash
+git init
+git add .
+git commit -m "Sistema de reservas"
+git branch -M main
+```
+
+Crea un repositorio en GitHub y luego:
+
+```bash
+git remote add origin https://github.com/TU-USUARIO/TU-REPO.git
+git push -u origin main
+```
+
+## 3️⃣ Deploy en Railway
+
+1. Entra a https://railway.app
+2. Click "New Project" → "Deploy from GitHub repo"
+3. Selecciona tu repositorio
+4. Railway lo detectará automáticamente como Node.js
+
+## 4️⃣ Configura contraseña
+
+En Railway:
+- Click en tu proyecto
+- Ve a "Variables"
+- Agrega: `APP_PASSWORD` = `TuContraseña`
+
+## ✅ Listo!
+
+Railway te dará una URL como:
+`https://tu-proyecto.up.railway.app`
+
+---
+
+## 🔄 Para actualizar el código
+
+```bash
+git add .
+git commit -m "Actualización"
+git push
+```
+
+Railway se actualiza automáticamente.
+
+## 🆘 Problemas?
+
+- Revisa Railway → Deployments → View Logs
+- Verifica que `APP_PASSWORD` esté configurada
+- La contraseña por defecto es: `reservas2024`
