@@ -1,0 +1,22 @@
+{
+  "name": "sistema-reservas",
+  "version": "1.0.0",
+  "description": "Sistema de gestión de reservas con calendario",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": ["reservas", "calendario"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "better-sqlite3": "^9.2.2",
+    "body-parser": "^1.20.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Reservas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1e3a5f;
+            --primary-light: #2d5a8f;
+            --accent: #f59e0b;
+            --accent-light: #fbbf24;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --shadow: rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Estilos de Login */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--card);
+            padding: 50px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px var(--shadow);
+            max-width: 450px;
+            width: 100%;
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .login-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .login-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 30px;
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--bg);
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(30, 58, 95, 0.1);
+        }
+
+        .btn-login {
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(30, 58, 95, 0.3);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(30, 58, 95, 0.4);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            color: var(--danger);
+            text-align: center;
+            padding: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* Estilos del Sistema de Reservas */
+        .app-container {
+            display: none;
+        }
+
+        .app-container.active {
+            display: block;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 25px;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            padding: 35px 40px;
+            border-radius: 20px;
+            color: white;
+            box-shadow: 0 10px 40px var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-content h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .header-content p {
+            opacity: 0.9;
+            font-size: 1.05rem;
+        }
+
+        .logout-btn {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px var(--shadow);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px var(--shadow);
+        }
+
+        .card h2 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 180px;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: var(--bg);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(30, 58, 95, 0.1);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        input, select {
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: var(--bg);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(30, 58, 95, 0.1);
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .calendar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .calendar-nav button {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-nav button:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .current-date {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .calendar {
+            background: var(--card);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+
+        .calendar-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .calendar-day-name {
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary);
+            padding: 12px;
+            font-size: 0.9rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .calendar-cell {
+            min-height: 100px;
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .calendar-cell:hover {
+            border-color: var(--primary);
+            background: white;
+            transform: scale(1.02);
+        }
+
+        .calendar-cell.other-month {
+            opacity: 0.4;
+        }
+
+        .cell-date {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+        }
+
+        .calendar-cell.today {
+            background: linear-gradient(135deg, var(--accent-light) 0%, var(--accent) 100%);
+            border-color: var(--accent);
+        }
+
+        .calendar-cell.today .cell-date {
+            color: white;
+        }
+
+        .reservation {
+            background: var(--primary);
+            color: white;
+            padding: 8px;
+            border-radius: 8px;
+            margin-top: 5px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .reservation:hover {
+            background: var(--primary-light);
+            transform: scale(1.05);
+        }
+
+        .reservation-time {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .reservation-name {
+            opacity: 0.9;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card);
+            padding: 35px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.4s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-header h3 {
+            font-size: 1.6rem;
+            color: var(--primary);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .close-btn:hover {
+            background: var(--bg);
+            color: var(--danger);
+        }
+
+        .detail-group {
+            margin-bottom: 20px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            padding: 12px 16px;
+            background: var(--bg);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .notification {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            padding: 18px 25px;
+            background: var(--success);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            animation: slideInRight 0.4s ease;
+            font-weight: 500;
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .export-section {
+            display: flex;
+            gap: 12px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                order: 2;
+            }
+            
+            .main-content {
+                order: 1;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .calendar-grid {
+                gap: 5px;
+            }
+            
+            .calendar-cell {
+                min-height: 80px;
+                padding: 5px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .login-card {
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Pantalla de Login -->
+    <div class="login-container" id="loginScreen">
+        <div class="login-card">
+            <div class="login-icon">🔐</div>
+            <div class="login-header">
+                <h1>Bienvenido</h1>
+                <p>Ingresa tu contraseña para continuar</p>
+            </div>
+            <form class="login-form" onsubmit="login(event)">
+                <div class="error-message" id="errorMessage"></div>
+                <div class="input-group">
+                    <input 
+                        type="password" 
+                        id="passwordInput" 
+                        placeholder="Contraseña" 
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
+                <button type="submit" class="btn-login" id="loginBtn">
+                    Ingresar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sistema de Reservas -->
+    <div class="app-container" id="appContainer">
+        <div class="container">
+            <div class="header">
+                <div class="header-content">
+                    <h1>Sistema de Reservas</h1>
+                    <p>Gestiona tus reservas de manera profesional y eficiente</p>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    🚪 Cerrar Sesión
+                </button>
+            </div>
+
+            <div class="sidebar">
+                <div class="card">
+                    <h2>Nueva Reserva</h2>
+                    <textarea id="pasteArea" placeholder="Pega aquí el texto con el formato:&#10;&#10;Nombre: Juan&#10;Apellido: Pérez&#10;Rut: 12345678-9&#10;Whatsapp: +56912345678&#10;Valor: 50000"></textarea>
+                    
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label>Fecha</label>
+                            <input type="date" id="reservationDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Hora</label>
+                            <input type="time" id="reservationTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Duración (horas)</label>
+                            <select id="duration">
+                                <option value="0.5">30 min</option>
+                                <option value="1" selected>1 hora</option>
+                                <option value="1.5">1.5 horas</option>
+                                <option value="2">2 horas</option>
+                                <option value="3">3 horas</option>
+                                <option value="4">4 horas</option>
+                            </select>
+                        </div>
+                        <div class="form-group full">
+                            <button class="btn btn-primary" onclick="saveReservation()">
+                                ✓ Guardar Reserva
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Exportar Datos</h2>
+                    <div class="export-section">
+                        <button class="btn btn-secondary" onclick="exportToCSV()" style="flex: 1;">
+                            📊 Exportar CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="calendar-controls">
+                    <div class="calendar-nav">
+                        <button onclick="changeMonth(-1)">◀ Anterior</button>
+                        <button onclick="goToToday()">Hoy</button>
+                        <button onclick="changeMonth(1)">Siguiente ▶</button>
+                    </div>
+                    <div class="current-date" id="currentMonth"></div>
+                </div>
+
+                <div class="card calendar">
+                    <div class="calendar-header">
+                        <div class="calendar-day-name">Dom</div>
+                        <div class="calendar-day-name">Lun</div>
+                        <div class="calendar-day-name">Mar</div>
+                        <div class="calendar-day-name">Mié</div>
+                        <div class="calendar-day-name">Jue</div>
+                        <div class="calendar-day-name">Vie</div>
+                        <div class="calendar-day-name">Sáb</div>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <div class="loading">Cargando...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Detalle de Reserva</h3>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let reservations = [];
+        let editingId = null;
+
+        // Verificar autenticación al cargar
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/check-auth');
+                const data = await response.json();
+                
+                if (data.authenticated) {
+                    showApp();
+                    loadData();
+                } else {
+                    showLogin();
+                }
+            } catch (error) {
+                console.error('Error al verificar autenticación:', error);
+                showLogin();
+            }
+        }
+
+        function showLogin() {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('appContainer').classList.remove('active');
+        }
+
+        function showApp() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appContainer').classList.add('active');
+        }
+
+        async function login(event) {
+            event.preventDefault();
+            
+            const password = document.getElementById('passwordInput').value;
+            const errorMsg = document.getElementById('errorMessage');
+            const loginBtn = document.getElementById('loginBtn');
+            
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Verificando...';
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showApp();
+                    loadData();
+                    document.getElementById('passwordInput').value = '';
+                    errorMsg.classList.remove('show');
+                } else {
+                    errorMsg.textContent = data.message;
+                    errorMsg.classList.add('show');
+                }
+            } catch (error) {
+                errorMsg.textContent = 'Error de conexión. Intenta nuevamente.';
+                errorMsg.classList.add('show');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Ingresar';
+            }
+        }
+
+        async function logout() {
+            if (!confirm('¿Estás seguro de cerrar sesión?')) return;
+            
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                showLogin();
+                reservations = [];
+            } catch (error) {
+                console.error('Error al cerrar sesión:', error);
+            }
+        }
+
+        async function loadData() {
+            try {
+                const response = await fetch('/api/reservations');
+                if (response.ok) {
+                    reservations = await response.json();
+                    renderCalendar();
+                }
+            } catch (error) {
+                console.error('Error al cargar datos:', error);
+                showNotification('Error al cargar reservas', false);
+            }
+        }
+
+        function parseTextData(text) {
+            const data = {};
+            const lines = text.split('\n');
+            
+            for (let line of lines) {
+                line = line.trim();
+                if (line.includes(':')) {
+                    const [key, ...valueParts] = line.split(':');
+                    const value = valueParts.join(':').trim();
+                    const keyLower = key.trim().toLowerCase();
+                    
+                    if (keyLower === 'nombre') data.nombre = value;
+                    else if (keyLower === 'apellido') data.apellido = value;
+                    else if (keyLower === 'rut') data.rut = value;
+                    else if (keyLower === 'whatsapp') data.whatsapp = value;
+                    else if (keyLower === 'valor') data.valor = value;
+                }
+            }
+            
+            return data;
+        }
+
+        async function saveReservation() {
+            const textData = document.getElementById('pasteArea').value;
+            const date = document.getElementById('reservationDate').value;
+            const time = document.getElementById('reservationTime').value;
+            const duration = document.getElementById('duration').value;
+
+            if (!textData.trim() || !date || !time) {
+                showNotification('Por favor completa todos los campos', false);
+                return;
+            }
+
+            const parsedData = parseTextData(textData);
+            
+            if (!parsedData.nombre) {
+                showNotification('No se pudo extraer el nombre del texto', false);
+                return;
+            }
+
+            const reservation = {
+                ...parsedData,
+                date,
+                time,
+                duration: parseFloat(duration)
+            };
+
+            try {
+                let response;
+                if (editingId) {
+                    response = await fetch(`/api/reservations/${editingId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(reservation)
+                    });
+                } else {
+                    response = await fetch('/api/reservations', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(reservation)
+                    });
+                }
+
+                if (response.ok) {
+                    clearForm();
+                    editingId = null;
+                    await loadData();
+                    showNotification('Reserva guardada exitosamente');
+                } else {
+                    showNotification('Error al guardar reserva', false);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error de conexión', false);
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('pasteArea').value = '';
+            document.getElementById('reservationDate').value = '';
+            document.getElementById('reservationTime').value = '';
+            document.getElementById('duration').value = '1';
+        }
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            
+            document.getElementById('currentMonth').textContent = 
+                `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const cell = createCalendarCell(daysInPrevMonth - i, month - 1, year, true);
+                grid.appendChild(cell);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const cell = createCalendarCell(day, month, year, false);
+                
+                const cellDate = new Date(year, month, day);
+                cellDate.setHours(0, 0, 0, 0);
+                
+                if (cellDate.getTime() === today.getTime()) {
+                    cell.classList.add('today');
+                }
+                
+                grid.appendChild(cell);
+            }
+
+            const totalCells = grid.children.length;
+            const remainingCells = (Math.ceil(totalCells / 7) * 7) - totalCells;
+            
+            for (let day = 1; day <= remainingCells; day++) {
+                const cell = createCalendarCell(day, month + 1, year, true);
+                grid.appendChild(cell);
+            }
+        }
+
+        function createCalendarCell(day, month, year, isOtherMonth) {
+            const cell = document.createElement('div');
+            cell.className = 'calendar-cell';
+            if (isOtherMonth) cell.classList.add('other-month');
+
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            
+            cell.innerHTML = `<div class="cell-date">${day}</div>`;
+
+            const dayReservations = reservations.filter(r => r.date === dateStr);
+            dayReservations.sort((a, b) => a.time.localeCompare(b.time));
+
+            dayReservations.forEach(reservation => {
+                const resDiv = document.createElement('div');
+                resDiv.className = 'reservation';
+                resDiv.innerHTML = `
+                    <div class="reservation-time">${reservation.time}</div>
+                    <div class="reservation-name">${reservation.nombre} ${reservation.apellido || ''}</div>
+                `;
+                resDiv.onclick = (e) => {
+                    e.stopPropagation();
+                    showReservationDetail(reservation);
+                };
+                cell.appendChild(resDiv);
+            });
+
+            return cell;
+        }
+
+        function showReservationDetail(reservation) {
+            const modal = document.getElementById('detailModal');
+            const body = document.getElementById('modalBody');
+
+            body.innerHTML = `
+                <div class="detail-group">
+                    <div class="detail-label">Nombre Completo</div>
+                    <div class="detail-value">${reservation.nombre} ${reservation.apellido || ''}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">RUT</div>
+                    <div class="detail-value">${reservation.rut || 'No especificado'}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">WhatsApp</div>
+                    <div class="detail-value">${reservation.whatsapp || 'No especificado'}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">Valor</div>
+                    <div class="detail-value">$${reservation.valor || 'No especificado'}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">Fecha y Hora</div>
+                    <div class="detail-value">${formatDate(reservation.date)} a las ${reservation.time}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">Duración</div>
+                    <div class="detail-value">${reservation.duration} hora(s)</div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" onclick="editReservation(${reservation.id})">
+                        ✏️ Editar
+                    </button>
+                    <button class="btn btn-danger" onclick="deleteReservation(${reservation.id})">
+                        🗑️ Eliminar
+                    </button>
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+
+        function editReservation(id) {
+            const reservation = reservations.find(r => r.id === id);
+            if (!reservation) return;
+
+            editingId = id;
+            
+            const textData = `Nombre: ${reservation.nombre}
+Apellido: ${reservation.apellido || ''}
+Rut: ${reservation.rut || ''}
+Whatsapp: ${reservation.whatsapp || ''}
+Valor: ${reservation.valor || ''}`;
+
+            document.getElementById('pasteArea').value = textData;
+            document.getElementById('reservationDate').value = reservation.date;
+            document.getElementById('reservationTime').value = reservation.time;
+            document.getElementById('duration').value = reservation.duration;
+
+            closeModal();
+            showNotification('Editando reserva. Modifica los datos y guarda.');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function deleteReservation(id) {
+            if (!confirm('¿Estás seguro de eliminar esta reserva?')) return;
+
+            try {
+                const response = await fetch(`/api/reservations/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    await loadData();
+                    closeModal();
+                    showNotification('Reserva eliminada');
+                } else {
+                    showNotification('Error al eliminar', false);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error de conexión', false);
+            }
+        }
+
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function goToToday() {
+            currentDate = new Date();
+            renderCalendar();
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr + 'T00:00:00');
+            return date.toLocaleDateString('es-CL', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+
+        function showNotification(message, isSuccess = true) {
+            const notif = document.createElement('div');
+            notif.className = 'notification';
+            notif.textContent = message;
+            if (!isSuccess) {
+                notif.style.background = 'var(--danger)';
+            }
+            document.body.appendChild(notif);
+
+            setTimeout(() => {
+                notif.style.animation = 'slideInRight 0.4s ease reverse';
+                setTimeout(() => notif.remove(), 400);
+            }, 3000);
+        }
+
+        function exportToCSV() {
+            if (reservations.length === 0) {
+                showNotification('No hay reservas para exportar', false);
+                return;
+            }
+
+            const sorted = [...reservations].sort((a, b) => {
+                if (a.nombre !== b.nombre) return a.nombre.localeCompare(b.nombre);
+                if (a.rut !== b.rut) return (a.rut || '').localeCompare(b.rut || '');
+                if (a.valor !== b.valor) return (a.valor || '0').localeCompare(b.valor || '0');
+                return a.date.localeCompare(b.date);
+            });
+
+            const headers = ['Nombre', 'Apellido', 'RUT', 'WhatsApp', 'Valor', 'Fecha', 'Hora', 'Duración (hrs)'];
+            const rows = sorted.map(r => [
+                r.nombre,
+                r.apellido || '',
+                r.rut || '',
+                r.whatsapp || '',
+                r.valor || '',
+                r.date,
+                r.time,
+                r.duration
+            ]);
+
+            let csv = headers.join(',') + '\n';
+            rows.forEach(row => {
+                csv += row.map(cell => `"${cell}"`).join(',') + '\n';
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `reservas_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showNotification('Archivo CSV descargado');
+        }
+
+        document.getElementById('reservationDate').valueAsDate = new Date();
+
+        // Iniciar verificación de autenticación
+        checkAuth();
+    </script>
+</body>
+</html>
