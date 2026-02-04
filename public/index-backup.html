@@ -640,64 +640,13 @@
         }
 
         @media (max-width: 640px) {
-            body {
-                padding: 10px;
-            }
-
-            .header h1 {
-                font-size: 1.8rem;
-            }
-
-            .header p {
-                font-size: 0.95rem;
-            }
-
             .calendar-grid {
-                gap: 3px;
+                gap: 5px;
             }
             
             .calendar-cell {
-                min-height: 70px;
-                padding: 4px;
-                font-size: 0.85rem;
-            }
-
-            .cell-date {
-                font-size: 0.85rem;
-            }
-
-            .reservation {
-                padding: 4px;
-                font-size: 0.7rem;
-                margin-top: 3px;
-            }
-
-            .reservation-time {
-                font-size: 0.7rem;
-            }
-
-            .calendar-day-name {
-                font-size: 0.75rem;
-                padding: 8px 4px;
-            }
-
-            .calendar {
-                padding: 15px;
-            }
-
-            .calendar-controls {
-                flex-direction: column;
-                gap: 15px;
-                padding: 15px;
-            }
-
-            .current-date {
-                font-size: 1.1rem;
-            }
-
-            .calendar-nav button {
-                padding: 8px 12px;
-                font-size: 0.9rem;
+                min-height: 80px;
+                padding: 5px;
             }
             
             .form-grid {
@@ -706,14 +655,6 @@
 
             .login-card {
                 padding: 30px;
-            }
-
-            .card {
-                padding: 20px;
-            }
-
-            .card h2 {
-                font-size: 1.2rem;
             }
         }
     </style>
@@ -792,21 +733,12 @@
                 </div>
 
                 <div class="card">
-                    <h2>Gestión de Datos</h2>
+                    <h2>Exportar Datos</h2>
                     <div class="export-section">
                         <button class="btn btn-secondary" onclick="exportToCSV()" style="flex: 1;">
                             📊 Exportar CSV
                         </button>
                     </div>
-                    <div class="export-section" style="margin-top: 12px;">
-                        <label for="csvFileInput" class="btn btn-primary" style="flex: 1; cursor: pointer; margin: 0;">
-                            📥 Importar CSV
-                        </label>
-                        <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="importCSV(event)">
-                    </div>
-                    <p style="margin-top: 12px; font-size: 0.85rem; color: var(--text-light);">
-                        El CSV debe tener: Nombre, Apellido, RUT, WhatsApp, Valor, Fecha, Hora, Duración
-                    </p>
                 </div>
             </div>
 
@@ -822,13 +754,13 @@
 
                 <div class="card calendar">
                     <div class="calendar-header">
+                        <div class="calendar-day-name">Dom</div>
                         <div class="calendar-day-name">Lun</div>
                         <div class="calendar-day-name">Mar</div>
                         <div class="calendar-day-name">Mié</div>
                         <div class="calendar-day-name">Jue</div>
                         <div class="calendar-day-name">Vie</div>
                         <div class="calendar-day-name">Sáb</div>
-                        <div class="calendar-day-name">Dom</div>
                     </div>
                     <div class="calendar-grid" id="calendarGrid">
                         <div class="loading">Cargando...</div>
@@ -1047,10 +979,7 @@
             document.getElementById('currentMonth').textContent = 
                 `${monthNames[month]} ${year}`;
 
-            // Ajustar para que la semana empiece en Lunes
-            let firstDay = new Date(year, month, 1).getDay();
-            firstDay = firstDay === 0 ? 6 : firstDay - 1; // Convertir: Dom=6, Lun=0, Mar=1, etc.
-            
+            const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             const daysInPrevMonth = new Date(year, month, 0).getDate();
 
@@ -1060,13 +989,11 @@
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            // Días del mes anterior
             for (let i = firstDay - 1; i >= 0; i--) {
                 const cell = createCalendarCell(daysInPrevMonth - i, month - 1, year, true);
                 grid.appendChild(cell);
             }
 
-            // Días del mes actual
             for (let day = 1; day <= daysInMonth; day++) {
                 const cell = createCalendarCell(day, month, year, false);
                 
@@ -1080,7 +1007,6 @@
                 grid.appendChild(cell);
             }
 
-            // Días del mes siguiente
             const totalCells = grid.children.length;
             const remainingCells = (Math.ceil(totalCells / 7) * 7) - totalCells;
             
@@ -1284,93 +1210,6 @@ Valor: ${reservation.valor || ''}`;
             document.body.removeChild(link);
 
             showNotification('Archivo CSV descargado');
-        }
-
-        async function importCSV(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const text = e.target.result;
-                    const lines = text.split('\n');
-                    
-                    if (lines.length < 2) {
-                        showNotification('El archivo CSV está vacío', false);
-                        return;
-                    }
-
-                    // Saltar la primera línea (headers)
-                    let imported = 0;
-                    let errors = 0;
-
-                    for (let i = 1; i < lines.length; i++) {
-                        const line = lines[i].trim();
-                        if (!line) continue;
-
-                        // Parsear CSV considerando comillas
-                        const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
-                        const cleanValues = values.map(v => v.replace(/^"|"$/g, '').trim());
-
-                        if (cleanValues.length < 8) continue;
-
-                        const [nombre, apellido, rut, whatsapp, valor, date, time, duration] = cleanValues;
-
-                        if (!nombre || !date || !time) {
-                            errors++;
-                            continue;
-                        }
-
-                        const reservation = {
-                            nombre,
-                            apellido: apellido || '',
-                            rut: rut || '',
-                            whatsapp: whatsapp || '',
-                            valor: valor || '',
-                            date,
-                            time,
-                            duration: parseFloat(duration) || 1
-                        };
-
-                        try {
-                            const response = await fetch('/api/reservations', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(reservation)
-                            });
-
-                            if (response.ok) {
-                                imported++;
-                            } else {
-                                errors++;
-                            }
-                        } catch (error) {
-                            console.error('Error al importar reserva:', error);
-                            errors++;
-                        }
-                    }
-
-                    // Recargar datos
-                    await loadData();
-
-                    // Mostrar resultado
-                    if (errors === 0) {
-                        showNotification(`✅ ${imported} reservas importadas exitosamente`);
-                    } else {
-                        showNotification(`⚠️ ${imported} importadas, ${errors} con errores`);
-                    }
-
-                    // Limpiar input
-                    event.target.value = '';
-
-                } catch (error) {
-                    console.error('Error al procesar CSV:', error);
-                    showNotification('Error al procesar el archivo CSV', false);
-                }
-            };
-
-            reader.readAsText(file);
         }
 
         document.getElementById('reservationDate').valueAsDate = new Date();
